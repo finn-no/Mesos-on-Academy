@@ -1,3 +1,6 @@
 Use the following for serving the content:
 
-`prez --serve --such-notes`
+```
+npm install -g prez
+prez --serve --such-notes
+```
