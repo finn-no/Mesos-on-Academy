@@ -1,0 +1,22 @@
+{
+  "name": "mesos-on-academy",
+  "private": true,
+  "description": "Presentation on Mesos held at FINN Academy 2015.02.25",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/finn-no/Mesos-on-Academy.git"
+  },
+  "author": "Stig Kleppe-Jørgensen",
+  "homepage": "https://github.com/finn-no/Mesos-on-Academy#readme",
+  "dependencies": {
+    "prez": "^4.5.0"
+  },
+  "devDependencies": {
+    "gh-pages": "^0.10.0"
+  },
+  "scripts": {
+    "start": "prez --serve --such-notes",
+    "develop": "prez --serve --such-notes --watch",
+    "deploy": "rm -rf build && prez --such-notes && gh-pages -d build"
+  }
+}
