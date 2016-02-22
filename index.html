@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>mesos-on-academy</title>
+
+    <meta name="description" content="Presentation on Mesos held at FINN Academy 2015.02.25">
+    <meta name="author" content="Stig Kleppe-Jørgensen">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/simple.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="css/highlight/styles/zenburn.css" id="highlight-theme">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <link rel="stylesheet" href="css/custom.css">
+
+  </head>
+
+  <body>
+
+    <div class="reveal">
+      <div class="slides"><section id="dcos" class="slide">
+<h1>Mesos</h1><h2>The Data Center OS</h2><h4>Stig Kleppe-Jørgensen - 2015.02.25</h4>
+</section>
+<section id="what.1" class="slide" data-has-notes="true">
+<h2>What is Mesos?</h2><h3>Makes the data center(s) look like one big pool of resources which can run all types of workloads at the same time</h3><aside class="notes"><p>Så hva er Mesos?</p>
+<p>Enkelt sagt tar den et cluster av maskiner og lager en stor pool av ressurser der en kan kjøre alle slags typer tjenester på en gang.</p></aside>
+</section>
+<section>
+<section id="why-why" class="slide" data-has-notes="true">
+<h1>But why?</h1><aside class="notes"><p>Da tenker jeg det er lurt å se på hvordan mange datasentre ser ut i dag</p></aside>
+</section>
+<section id="why-why.dc" class="slide" data-background="images/datacenter.png" data-background-size="60%" data-has-notes="true">
+<aside class="notes"><p>Tenk deg at du har flere tjenester du vil kjøre samtidig.
+Du får tak i en haug med datamaskiner, (bedre kjent som et datasenter)</p></aside>
+</section>
+<section id="why-why.shared" class="slide" data-background="images/shared.png" data-background-size="60%" data-has-notes="true">
+<aside class="notes"><p>og begynner å spre tjenestene ut på disse
+Her har jeg bare 2 typer tjenester som et eksempel.
+Dette er en manuell jobb, dvs. vi velger hvilken tjeneste
+som skal gå på en spesifikk maskin, f.eks. ved å sette
+opp dette i Puppet.</p>
+<p>Det er 2 problemer med dette:</p></aside>
+</section>
+<section id="why-why.most_taken" class="slide" data-background="images/most_taken.png" data-background-size="60%" data-has-notes="true">
+<aside class="notes"><p>For det første blir det vanskelig å endre hvor mye
+ressurser en tjeneste har etter hvor stort behovet
+er. Eneste måten er å endre i Puppet-configen som jo
+blir veldig lite dynamisk og gir en treg roundtrip.</p></aside>
+</section>
+<section id="why-why.all_taken" class="slide" data-background="images/all_taken.png" data-background-size="60%" data-has-notes="true">
+<aside class="notes"><p>For det andre er det vanskelig å utnytte ressursene
+maksimalt. Typisk vil de som bestiller tjenesten også
+ta i litt ekstra for å være sikker på at tjenesten
+ikke kræsjer. Litt ekstra minne her og litt ekstra disk der.</p>
+<p>Jeg har hørt tall som sier at om en kommer opp i 15-20% utnyttelse
+av ressursene i et datasenter, skal man være veldig fornøyd. Og
+ofte ser man en nær dobling av dette tallet når en begynner å bruke
+systemer som Mesos.</p></aside>
+</section>
+<section id="why-why.back" class="slide" data-background="images/shared.png" data-background-size="60%" data-has-notes="true">
+<aside class="notes"><p>Jeg tok visst feil, her er et 3. problem.</p></aside>
+</section>
+<section id="why-why.fail_some" class="slide" data-background="images/fail_some.png" data-background-size="60%" data-has-notes="true">
+<aside class="notes"><p>Hva skjer når maskiner kræsjer? Først vil det
+kanskje ikke være noe problem. Kanskje tjenesten
+takler at den har litt mindre ressurser. Eller
+ikke.</p></aside>
+</section>
+<section id="why-why.fail_all" class="slide" data-background="images/fail_all.png" data-background-size="60%" data-has-notes="true">
+<aside class="notes"><p>Men den vil i hvertfall ikke fikse at alle
+ressurser forsvinner!</p></aside>
+</section>
+<section id="why-why.datacenter" class="slide" data-background="images/datacenter.png" data-background-size="60%" data-has-notes="true">
+<aside class="notes"><p>Dette er noen av problemene som Mesos prøver å gjøre
+noe med.</p></aside>
+</section>
+<section id="why-why.cpus" class="slide" data-background="images/cpus.png" data-background-size="60%" data-has-notes="true">
+<aside class="notes"><p>Ideen er som sagt å ta alle ressursene i et datasenter</p></aside>
+</section>
+<section id="why-why.virtual_dc" class="slide" data-background="images/virtual_dc.png" data-background-size="60%" data-has-notes="true">
+<aside class="notes"><p>og putte de sammen i en logisk   maskin som
+alle tjenestene kan kjøres på.</p></aside>
+</section>
+</section>
+<section id="what.2" class="slide" data-has-notes="true">
+<h2>What is Mesos?</h2><ul>
+<li>Highly-elastic, highly-available and fault-tolerant</li>
+<li>Makes it very easy to deploy new services</li>
+<li>Can mix different types of workloads on the same machines</li>
+</ul>
+<image src="images/system_setup.png"/><aside class="notes"><p>I motsetning til den manuelle måten å dele opp ressurser på,
+gjør Mesos dette helt dynamisk ettersom hvor det er ledig
+kapasitet. Den takler også feil med maskiner, etc. på en god
+måte, ved å flytte tjenester fra den feilende maskinen til
+en annen maskin.</p>
+<p>Siden Mesos dynamisk tildeler ressurser, blir det veldig
+enkelt å starte nye tjenester. Man trenger ikke sette opp
+nye maskiner eller vite hvilke maskiner som kanskje har
+ledig kapasitet, men bare pushe en beskrivelse av
+appen til Mesos så tar den seg av å starte den opp.</p>
+<p>Fordelen med Mesos ift f.eks. YARN for Hadoop-verdenen
+eller Kubernetes fra Google, er at den kan la mange
+forskjellige typer tjenester dele på de samme ressursene,
+f.eks. Kafka, Cassandra, web-apper, batch, bygg-agenter.</p>
+<p>Her er et eksempel på installasjon av Mesos, med 3 mastere
+som er koblet sammen vha ZooKeeper og flere Mesos slaver som
+kjører på maskinene som skal kjøre tjenestene. Disse slavene
+kan også kjøre på tvers av datasentre og public clouds.</p></aside>
+</section>
+<section id="what.3" class="slide" data-has-notes="true">
+<h2>Simple demo</h2><iframe style="width: 100%; height: 15em;" src="http://mesosphere.io/simulator/"></iframe><aside class="notes"><p>I motsetning til den manuelle måten å dele opp ressurser på,
+gjør Mesos dette helt dynamisk ettersom hvor det er ledig
+kapasitet. Den takler også feil med maskiner, etc. på en god
+måte, ved å flytte tjenester fra den feilende maskinen til
+en annen maskin.</p>
+<p>Siden Mesos dynamisk tildeler ressurser, blir det veldig
+enkelt å starte nye tjenester. Man trenger ikke sette opp
+nye maskiner eller vite hvilke maskiner som kanskje har
+ledig kapasitet, men bare pushe en beskrivelse av
+appen til Mesos så tar den seg av å starte den opp.</p>
+<p>Fordelen med Mesos ift f.eks. YARN for Hadoop-verdenen
+eller Kubernetes fra Google, er at den kan la mange
+forskjellige typer tjenester dele på de samme ressursene,
+f.eks. Kafka, Cassandra, web-apper, batch, bygg-agenter.</p></aside>
+</section>
+<section id="what.4" class="slide" data-has-notes="true">
+<h2>What is Mesos?</h2><ul>
+<li>Open source Apache project</li>
+<li>10.000s of nodes</li>
+<li>Native isolation between tasks<ul>
+<li>cgroups</li>
+<li>Docker</li>
+</ul>
+</li>
+<li>REST-based API for managing config and jobs</li>
+<li>Admin Web UI showing cluster state</li>
+</ul><aside class="notes"><p>Mesos skalerer bra med masse maskiner og
+har støtte for Docker, slik at tjenestene
+kjøres opp isolert fra hverandre. Den får
+til isolasjon uten å bruke Docker også, da den
+bruker teknologien som Docker bruker for
+dette, cgroups, direkte.</p>
+<p>Den har et REST-basert API for å endre config
+og deploye tjenester og et web gui for admin.</p></aside>
+</section>
+<section id="how" class="slide" data-has-notes="true">
+<h2>How does it work?</h2><ul>
+<li>Two-level scheduling</li>
+<li>Cannot do anything itself with the resources</li>
+<li>Plugins, called frameworks, decides what to do with them</li>
+<li>So all specific handling of different workloads
+are done through the frameworks</li>
+</ul><aside class="notes"><p>Mesos er en 2-nivå-scheduler, dvs. den vet ikke hva den
+skal gjøre med ledige ressurser, men delegerer dette
+ansvaret videre til Mesos plugins som blir kalt rammeverk.</p>
+<p>Disse rammeverkene blir får tilbud fra Mesos om så og så mye
+minne, cpu, disk, osv. Deretter takker de ja eller nei
+på disse tilbudene, f.eks. basert på om ressursene ligger
+på samme maskin som en tjeneste den trenger tilgang til.</p>
+<p>Hvis et rammeverk takker ja, sender det med
+hvordan tjenesten skal kjøres, så velger Mesos ut hvor
+den skal kjøres.</p>
+<p>Derfor trenger ikke Mesos vite om hvordan forskjellige
+typer tjenester, f.eks. batch, skal håndteres. Det gjøres
+av rammeverkene.</p></aside>
+</section>
+<section id="frameworks" class="slide" data-has-notes="true">
+<h2>Mesos Frameworks</h2><h3>Marathon, Kubernetes, Chronos, Kafka, Cassandra, Spark, Storm, Hadoop, Deis, Jenkins...</h3><aside class="notes"><p>Her har vi noen av rammeverkene som finnes til Mesos.</p>
+<p>Marathon brukes for å kjøre vanlige langt-kjørende tjenester
+som frontend, api, etc.</p>
+<p>Kubernetes fra Google er tilsvarende, men har mer faste rammer
+på hvordan dette skal gjøres.</p>
+<p>Chronos er en distribuert cron, har støtte for deps mellom
+cron-jobber og god feilhåndtering.</p>
+<p>Deis er en open source Heroku-clone, mer eller mindre.</p>
+<p>Det er også mulighet til å sette opp hvordan ressursene skal
+fordeles mellom rammeverkene, f.eks. så vil en ikke at noen
+veldig ressurskrevende bygge-jobber skal kvele produksjon.</p></aside>
+</section>
+<section>
+
+</section></div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+      controls: true,
+      progress: true,
+      history: true,
+      center: true,
+
+      transition: Reveal.getQueryHash().transition || 'slide', // none/fade/slide/convex/concave/zoom
+
+      // Optional reveal.js plugins
+      dependencies: [
+        //{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        //{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        //{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+        { src: 'plugin/zoom-js/zoom.js', async: true },
+        { src: 'plugin/notes/notes.js', async: true }
+      ]
+    });
+    </script>
+
+    <script src="js/dynamic-theme.js"></script><script src="js/such-notes-print.js"></script><script src="js/custom.js"></script>
+
+  </body>
+</html>
